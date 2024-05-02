@@ -1,7 +1,7 @@
 import java.util.ArrayList;
-
+import java.util.LinkedList;
 import java.util.HashMap;
-
+import java.util.Queue;
 import java.util.List;
 import java.util.Map;
 import java.io.BufferedReader;
@@ -9,6 +9,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 class TreeNode {
     private int id;
@@ -82,8 +84,10 @@ public class Main {
         int maxBranchLength = getMaxBranchLength(trees);
         int maxBranchId = getMaxBranchId(trees);
 
-        // Вывод пути самой длинной ветки
-        System.out.println("Самая длинная ветка: " + getLongestBranchPath(trees));
+        // Вывод пути самой длинной ветки для каждого дерева
+        for (Tree tree : trees) {
+            System.out.println("Самая длинная ветка для дерева с корнем " + tree.getRoot().getId() + ": " + getLongestBranchPath(tree.getRoot()));
+        }
 
         // Запись результатов в файл result.txt
         writeResultToFile(totalTrees, totalLeaves, maxBranchId, maxBranchLength);
@@ -159,21 +163,29 @@ public class Main {
         return maxBranchLength;
     }
 
-    private static int calculateMaxBranchLength(TreeNode node) {
-        System.out.println("Calculating branch length for node " + node.getId());
-        if (node.isLeaf()) {
-            System.out.println("Node " + node.getId() + " is a leaf, length is 1");
-            return 1;
+    private static int calculateMaxBranchLength(TreeNode root) {
+        if (root == null) {
+            return 0;
         }
-        int maxChildBranchLength = 0;
-        for (TreeNode child : node.getChildren()) {
-            int childBranchLength = calculateMaxBranchLength(child);
-            System.out.println("Child branch length for node " + child.getId() + ": " + childBranchLength);
-            maxChildBranchLength = Math.max(maxChildBranchLength, childBranchLength);
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        int maxBranchLength = 0;
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                for (TreeNode child : node.getChildren()) {
+                    queue.offer(child);
+                }
+            }
+            maxBranchLength++;
         }
-        System.out.println("Max branch length for node " + node.getId() + ": " + (maxChildBranchLength + 1));
-        return maxChildBranchLength + 1;
+
+        return maxBranchLength;
     }
+
 
     public static int getMaxBranchId(List<Tree> trees) {
         int maxBranchId = 0;
@@ -208,21 +220,33 @@ public class Main {
     }
 
 
-    public static String getLongestBranchPath(List<Tree> trees) {
-        StringBuilder longestBranchPath = new StringBuilder();
-        int maxLength = 0;
+    private static String getLongestBranchPath(TreeNode root) {
+        if (root == null) {
+            return "";
+        }
 
-        for (Tree tree : trees) {
-            List<String> paths = new ArrayList<>();
-            getPath(tree.getRoot(), "", paths);
-            for (String path : paths) {
-                if (path.length() > longestBranchPath.length()) {
-                    longestBranchPath = new StringBuilder(path);
-                }
+        Map<TreeNode, String> pathMap = new HashMap<>();
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        stack.push(root);
+        pathMap.put(root, String.valueOf(root.getId()));
+
+        String longestPath = "";
+
+        while (!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            String currentPath = pathMap.get(node);
+
+            if (node.isLeaf() && currentPath.length() > longestPath.length()) {
+                longestPath = currentPath;
+            }
+
+            for (TreeNode child : node.getChildren()) {
+                stack.push(child);
+                pathMap.put(child, currentPath + "->" + child.getId());
             }
         }
 
-        return longestBranchPath.toString();
+        return longestPath;
     }
 
     private static void getPath(TreeNode node, String currentPath, List<String> paths) {
