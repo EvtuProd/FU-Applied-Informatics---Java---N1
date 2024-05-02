@@ -37,3 +37,17 @@ class TreeNode {
         return parent == null;
     }
 }
+class Tree {
+    private TreeNode root;
+
+    public Tree(TreeNode root) {
+        if (root == null) {
+            throw new IllegalArgumentException("Root node cannot be null.");
+        }
+        this.root = root;
+    }
+
+    public TreeNode getRoot() {
+        return root;
+    }
+}
