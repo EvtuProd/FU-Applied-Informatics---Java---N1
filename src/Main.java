@@ -8,6 +8,8 @@ import java.util.Map;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 class TreeNode {
     private int id;
@@ -115,6 +117,7 @@ public class Main {
         int count = 0;
         for (Tree tree : trees) {
             if (hasMaxBranch(tree.getRoot(), maxBranchLength)) {
+                System.out.println("Дерево с максимальной веткой найдено: " + tree.getRoot().getId());
                 count++;
             }
         }
@@ -122,14 +125,32 @@ public class Main {
     }
 
     private static boolean hasMaxBranch(TreeNode node, int maxBranchLength) {
-        if (node.isLeaf()) {
-            return maxBranchLength == 1;
+        if (node == null) {
+            return false;
         }
-        for (TreeNode child : node.getChildren()) {
-            if (hasMaxBranch(child, maxBranchLength - 1)) {
+
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        Deque<Integer> levels = new ArrayDeque<>();
+        stack.push(node);
+        levels.push(1);
+
+        while (!stack.isEmpty()) {
+            TreeNode currNode = stack.pop();
+            int currLevel = levels.pop();
+
+            System.out.println("Проверяем узел: " + currNode.getId() + ", уровень: " + currLevel);
+
+            if (currLevel == maxBranchLength && currNode.isLeaf()) {
+                System.out.println("Найдена максимальная ветка в дереве с корнем " + node.getId());
                 return true;
             }
+
+            for (TreeNode child : currNode.getChildren()) {
+                stack.push(child);
+                levels.push(currLevel + 1);
+            }
         }
+
         return false;
     }
     public static List<Tree> readTreesFromFile(String filename) {
