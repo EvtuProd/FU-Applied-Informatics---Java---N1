@@ -5,6 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 class TreeNode {
     private int id;
@@ -60,7 +63,13 @@ class Tree {
 public class Main {
     public static void main(String[] args) {
         List<Tree> trees = readTreesFromFile("input.csv");
-        // Далее работаем с полученным списком деревьев
+        int totalTrees = trees.size();
+        int totalLeaves = countLeavesInAllTrees(trees);
+        int maxBranchLength = getMaxBranchLength(trees);
+        int treesWithMaxBranch = countTreesWithMaxBranch(trees, maxBranchLength);
+
+        // Запись результатов в файл result.txt
+        writeResultToFile(totalTrees, totalLeaves, maxBranchLength, treesWithMaxBranch);
     }
 
     public static List<Tree> readTreesFromFile(String filename) {
@@ -101,5 +110,17 @@ public class Main {
         }
 
         return trees;
+    }
+    public static void writeResultToFile(int totalTrees, int totalLeaves, int maxBranchLength, int treesWithMaxBranch) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"))) {
+            writer.write(totalTrees + " " + totalLeaves + " ");
+            if (treesWithMaxBranch > 1 || maxBranchLength == 0) {
+                writer.write("0 0");
+            } else {
+                writer.write("1 " + maxBranchLength);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
