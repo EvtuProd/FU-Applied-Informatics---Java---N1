@@ -71,7 +71,67 @@ public class Main {
         // Запись результатов в файл result.txt
         writeResultToFile(totalTrees, totalLeaves, maxBranchLength, treesWithMaxBranch);
     }
+    public static int countLeavesInAllTrees(List<Tree> trees) {
+        int totalLeaves = 0;
+        for (Tree tree : trees) {
+            totalLeaves += countLeaves(tree.getRoot());
+        }
+        return totalLeaves;
+    }
 
+    private static int countLeaves(TreeNode node) {
+        if (node.isLeaf()) {
+            return 1;
+        }
+        int count = 0;
+        for (TreeNode child : node.getChildren()) {
+            count += countLeaves(child);
+        }
+        return count;
+    }
+
+    public static int getMaxBranchLength(List<Tree> trees) {
+        int maxBranchLength = 0;
+        for (Tree tree : trees) {
+            int branchLength = calculateMaxBranchLength(tree.getRoot());
+            maxBranchLength = Math.max(maxBranchLength, branchLength);
+        }
+        return maxBranchLength;
+    }
+
+    private static int calculateMaxBranchLength(TreeNode node) {
+        if (node.isLeaf()) {
+            return 1;
+        }
+        int maxChildBranchLength = 0;
+        for (TreeNode child : node.getChildren()) {
+            int childBranchLength = calculateMaxBranchLength(child);
+            maxChildBranchLength = Math.max(maxChildBranchLength, childBranchLength);
+        }
+        return maxChildBranchLength + 1;
+    }
+
+    public static int countTreesWithMaxBranch(List<Tree> trees, int maxBranchLength) {
+        int count = 0;
+        for (Tree tree : trees) {
+            if (hasMaxBranch(tree.getRoot(), maxBranchLength)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean hasMaxBranch(TreeNode node, int maxBranchLength) {
+        if (node.isLeaf()) {
+            return maxBranchLength == 1;
+        }
+        for (TreeNode child : node.getChildren()) {
+            if (hasMaxBranch(child, maxBranchLength - 1)) {
+                return true;
+            }
+        }
+        return false;
+    }
     public static List<Tree> readTreesFromFile(String filename) {
         List<Tree> trees = new ArrayList<>();
         Map<Integer, TreeNode> nodesMap = new HashMap<>();
